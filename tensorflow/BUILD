@@ -562,11 +562,11 @@ tf_cc_shared_object(
         "//tensorflow:tf_exported_symbols.lds",
         "//tensorflow:tf_version_script.lds",
         "//tensorflow/c:c_api",
-        "//tensorflow/c/eager:c_api",
+	#"//tensorflow/c/eager:c_api",
         "//tensorflow/cc:cc_ops",
         "//tensorflow/cc:client_session",
         "//tensorflow/cc:scope",
-        "//tensorflow/cc/profiler",
+        #"//tensorflow/cc/profiler",
         "//tensorflow/core:tensorflow",
     ],
 )
