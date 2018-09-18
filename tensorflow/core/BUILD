@@ -2940,6 +2940,7 @@ cc_library(
 GPU_RUNTIME_HEADERS = [
     "common_runtime/gpu/cuda_host_allocator.h",
     "common_runtime/gpu/gpu_bfc_allocator.h",
+    "common_runtime/gpu/gpu_buddy_allocator.h",
     "common_runtime/gpu/gpu_cudamalloc_allocator.h",
     "common_runtime/gpu/gpu_debug_allocator.h",
     "common_runtime/gpu/gpu_device.h",
@@ -2958,6 +2959,7 @@ tf_cuda_library(
     name = "gpu_runtime_impl",
     srcs = [
         "common_runtime/gpu/gpu_bfc_allocator.cc",
+        "common_runtime/gpu/gpu_buddy_allocator.cc",
         "common_runtime/gpu/gpu_cudamalloc_allocator.cc",
         "common_runtime/gpu/gpu_debug_allocator.cc",
         "common_runtime/gpu/gpu_device.cc",
@@ -2969,7 +2971,7 @@ tf_cuda_library(
         "common_runtime/gpu/gpu_util_platform_specific.cc",
     ],
     hdrs = GPU_RUNTIME_HEADERS,
-    copts = tf_copts(),
+    copts = tf_copts() + ["-std=c++17"],
     deps = [
         ":core_cpu_impl",
         ":core_cpu_lib",

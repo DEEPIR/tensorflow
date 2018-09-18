@@ -21,6 +21,7 @@ limitations under the License.
 #include "tensorflow/core/common_runtime/gpu/cuda_host_allocator.h"
 #include "tensorflow/core/common_runtime/gpu/gpu_bfc_allocator.h"
 #include "tensorflow/core/common_runtime/gpu/gpu_cudamalloc_allocator.h"
+#include "tensorflow/core/common_runtime/gpu/gpu_buddy_allocator.h"
 #include "tensorflow/core/common_runtime/gpu/gpu_debug_allocator.h"
 #include "tensorflow/core/common_runtime/gpu/gpu_id.h"
 #include "tensorflow/core/common_runtime/gpu/gpu_id_manager.h"
@@ -45,6 +46,12 @@ bool useCudaMallocAllocator() {
   const char* debug_allocator_str = std::getenv("TF_GPU_ALLOCATOR");
   return debug_allocator_str != nullptr &&
          std::strcmp(debug_allocator_str, "cuda_malloc") == 0;
+}
+
+bool useCudaBuddyAllocator() {
+  const char* debug_allocator_str = std::getenv("TF_GPU_ALLOCATOR");
+  return debug_allocator_str != nullptr &&
+         std::strcmp(debug_allocator_str, "buddy") == 0;
 }
 
 bool useCudaMemoryGuardAllocator() {
@@ -114,7 +121,12 @@ Allocator* GPUProcessState::GetGPUAllocator(const GPUOptions& options,
 
     // If true, checks for memory overwrites by writing
     // distinctive patterns on both ends of allocated memory.
-    if (useCudaMemoryGuardAllocator()) {
+    if (useCudaBuddyAllocator()) {
+      // If true, passes all allocation requests through to cudaMalloc
+      // useful for doing memory debugging with tools like cuda-memcheck
+      // **WARNING** probably will not work in a multi-gpu scenario
+      gpu_allocator = new GPUbuddyAllocator(gpu_allocator, cuda_gpu_id);
+    } else if (useCudaMemoryGuardAllocator()) {
       gpu_allocator = new GPUDebugAllocator(gpu_allocator, cuda_gpu_id);
       gpu_allocator = new GPUNanResetAllocator(gpu_allocator, cuda_gpu_id);
     } else if (useCudaMallocAllocator()) {
